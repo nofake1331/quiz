@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', function () {
    const formAnswers = document.querySelector('#formAnswers')
    const prevButton = document.querySelector('#prev')
    const nextButton = document.querySelector('#next')
+   const sendButton = document.querySelector('#send')
 
 
 
@@ -96,13 +97,13 @@ document.addEventListener('DOMContentLoaded', function () {
 
    const playTest = () => {
   let numberQuestion = 0;
-
+   const finalAnswers = [];
       const renderAnswers = (index) => {
          questions[index].answers.forEach((answrs) => {
             const answerItem = document.createElement('div')
-            answerItem.classList.add('answers-item', 'd-flex', 'flex-column');
+            answerItem.classList.add('answers-item', 'd-flex', 'justify-content-center');
             answerItem.innerHTML = `
-         <input type="${questions[index].type}" id="${answrs.title}" name="answer" class="d-none">
+         <input type="${questions[index].type}" id="${answrs.title}" name="answer" class="d-none" value="${answrs.title}">
          <label for="${answrs.title}" class="d-flex flex-column justify-content-between">
          <img class="answerImg" src=${answrs.url} alt="burger">
          <span>${answrs.title}</span>
@@ -114,29 +115,81 @@ document.addEventListener('DOMContentLoaded', function () {
       }
 
       const renderQest = (indexQuestion) => {
-        if (indexQuestion ==0){
-          prevButton.hidden = true;
-        }
-        else if (indexQuestion == questions.length -1){
-         nextButton.hidden = true;
-        }
-        else{
-         prevButton.hidden = false;
-         nextButton.hidden = false;
-        }
-         formAnswers.innerHTML = '';
-         questTitle.textContent = `${questions[indexQuestion].question}`;
-         renderAnswers(indexQuestion);
-      }
+          switch(true){
 
+     
+            case (numberQuestion >0 && numberQuestion <= questions.length -1):
+                formAnswers.innerHTML = '';
+                questTitle.textContent = `${questions[indexQuestion].question}`;
+                renderAnswers(indexQuestion);
+                prevButton.classList.remove('d-none');
+                nextButton.classList.remove('d-none');
+                sendButton.classList.add('d-none');
+                break;
+            case(numberQuestion == 0):  
+            formAnswers.innerHTML = '';
+            questTitle.textContent = `${questions[indexQuestion].question}`;
+            renderAnswers(indexQuestion);
+                prevButton.classList.add('d-none');
+            break;
+          
+            
+            case(numberQuestion === questions.length):
+              formAnswers.textContent = "Спасибо"
+            nextButton.classList.add('d-none');
+            prevButton.classList.add('d-none');
+            sendButton.classList.remove('d-none');
+
+            formAnswers.innerHTML = ` <div class="form-group">
+            <label for="numberPhone">Enter you number</label>
+            <input type="phone" class="form-control" id="numberPhone" placeholder="numberPhone">
+          </div>`
+            break;
+
+            case(numberQuestion === questions.length + 1):
+              formAnswers.textContent = 'Спасибо за пройденый тест';
+              setTimeout(()=>{
+                  modalBlock.classList.remove('d-block');
+              },2000)
+            break;
+          }         
+
+       
+        
+    }
+
+    const checkAnswer = () =>{
+        const obj = {};
+        const inputs = [...formAnswers.elements].filter((input)=> input.checked || input.id ==='numberPhone');
+        
+        inputs.forEach((input,index)=>{
+            if (numberQuestion >=0 && numberQuestion <= questions.length -1) {
+            obj[`${index}_${questions[numberQuestion].question}`]= input.value
+            }
+
+            if(numberQuestion === questions.length){
+                obj['Номер телефона']= input.value
+            }
+        })
+        finalAnswers.push(obj)
+    }
       renderQest(numberQuestion);
       nextButton.onclick = ()=>{
+          checkAnswer();
          numberQuestion++
          renderQest(numberQuestion)
       }
       prevButton.onclick =()=>{
          numberQuestion--
          renderQest(numberQuestion)
+      }
+
+      sendButton.onclick = ()=> {
+        checkAnswer();
+        numberQuestion++
+        renderQest(numberQuestion)
+        console.log(finalAnswers);
+        
       }
    }
 })
