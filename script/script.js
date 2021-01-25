@@ -7,87 +7,41 @@ document.addEventListener('DOMContentLoaded', function () {
    const prevButton = document.querySelector('#prev')
    const nextButton = document.querySelector('#next')
    const sendButton = document.querySelector('#send')
+   const firebaseConfig = {
+    apiKey: "AIzaSyC23VG0GLRa8jLuQPoK6hgfjoVVVzWBXqk",
+    authDomain: "quiz-5004c.firebaseapp.com",
+    databaseURL: "https://quiz-5004c-default-rtdb.firebaseio.com",
+    projectId: "quiz-5004c",
+    storageBucket: "quiz-5004c.appspot.com",
+    messagingSenderId: "954767026474",
+    appId: "1:954767026474:web:0da017d49e4cc3816b9653"
+  };
+
+  firebase.initializeApp(firebaseConfig);
 
 
 
-   const questions = [
-      {
-          question: "Какого цвета бургер?",
-          answers: [
-              {
-                  title: 'Стандарт',
-                  url: './image/burger.png'
-              },
-              {
-                  title: 'Черный',
-                  url: './image/burgerBlack.png'
-              }
-          ],
-          type: 'radio'
-      },
-      {
-          question: "Из какого мяса котлета?",
-          answers: [
-              {
-                  title: 'Курица',
-                  url: './image/chickenMeat.png'
-              },
-              {
-                  title: 'Говядина',
-                  url: './image/beefMeat.png'
-              },
-              {
-                  title: 'Свинина',
-                  url: './image/porkMeat.png'
-              }
-          ],
-          type: 'radio'
-      },
-      {
-          question: "Дополнительные ингредиенты?",
-          answers: [
-              {
-                  title: 'Помидор',
-                  url: './image/tomato.png'
-              },
-              {
-                  title: 'Огурец',
-                  url: './image/cucumber.png'
-              },
-              {
-                  title: 'Салат',
-                  url: './image/salad.png'
-              },
-              {
-                  title: 'Лук',
-                  url: './image/onion.png'
-              }
-          ],
-          type: 'checkbox'
-      },
-      {
-          question: "Добавить соус?",
-          answers: [
-              {
-                  title: 'Чесночный',
-                  url: './image/sauce1.png'
-              },
-              {
-                  title: 'Томатный',
-                  url: './image/sauce2.png'
-              },
-              {
-                  title: 'Горчичный',
-                  url: './image/sauce3.png'
-              }
-          ],
-          type: 'radio'
-      }
-  ];
 
+   const getdata = () =>{
+       formAnswers.textContent = 'LOAD';
+ 
+       nextButton.classList.add('d-none');
+       prevButton.classList.add('d-none');
+       setTimeout(() => {
+
+      firebase.database().ref().child('questions').once('value')
+      .then(snap => playTest(snap.val()))
+   
+        .catch(err =>{ 
+            formAnswers.textContent = 'Ошибка загрузки данных'
+            console.error(err)})
+       }, 500);
+   } 
+
+  
    btnOpenModal.addEventListener('click', () => {
       modalBlock.classList.add('d-block');
-      playTest();
+      getdata();
    })
    closeModal.addEventListener('click', () => {
       modalBlock.classList.remove('d-block')
@@ -95,7 +49,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
 
-   const playTest = () => {
+   const playTest = (questions  ) => {
+    prevButton.classList.remove('d-none');
+    nextButton.classList.remove('d-none');
   let numberQuestion = 0;
    const finalAnswers = [];
       const renderAnswers = (index) => {
@@ -188,7 +144,8 @@ document.addEventListener('DOMContentLoaded', function () {
         checkAnswer();
         numberQuestion++
         renderQest(numberQuestion)
-        console.log(finalAnswers);
+        firebase.database().ref().child('contacts').push(finalAnswers)
+        
         
       }
    }
